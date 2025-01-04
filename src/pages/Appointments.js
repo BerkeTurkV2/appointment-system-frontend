@@ -20,7 +20,7 @@ const Appointments = () => {
                 return;
             }
 
-            const response = await fetch(`http://localhost:8080/api/appointments/user/${user.id}`);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/appointments/user/${user.id}`);
             if (!response.ok) {
                 throw new Error('Randevular yüklenirken bir hata oluştu');
             }
@@ -42,7 +42,7 @@ const Appointments = () => {
                     return;
                 }
 
-                const response = await fetch(`http://localhost:8080/api/appointments/${appointmentId}`, {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/api/appointments/${appointmentId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

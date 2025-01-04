@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -9,6 +8,7 @@ const Login = () => {
         password: ''
     });
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         setFormData({
@@ -19,15 +19,30 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+        setLoading(true);
+
         try {
-            const response = await axios.post('http://localhost:8080/api/login', formData);
-            if (response.data) {
-                // Kullanıcı bilgilerini localStorage'a kaydet
-                localStorage.setItem('user', JSON.stringify(response.data));
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('user', JSON.stringify(data));
                 navigate('/main');
+            } else {
+                const data = await response.json();
+                throw new Error(data.message || 'Giriş başarısız');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Giriş başarısız oldu');
+            setError(err.message || 'Giriş sırasında bir hata oluştu');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -64,7 +79,7 @@ const Login = () => {
                                     required 
                                 />
                             </div>
-                            <button type="submit" className="btn btn-primary w-100 mt-3">Giriş Yap</button>
+                            <button type="submit" className="btn btn-primary w-100 mt-3" disabled={loading}>Giriş Yap</button>
                         </form>
                         <div className="text-center mt-3">
                             <p>Henüz hesabın yok mu? <a href="/register" className="text-white fw-bold fs-5 ps-2">Kayıt Ol</a></p>

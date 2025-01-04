@@ -64,7 +64,7 @@ const NewAppointment = () => {
                 appointment_time: formData.time
             };
 
-            const response = await fetch('http://localhost:8080/api/appointments/create', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/appointments/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
