@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { departments, doctors } from '../data/hospitalData';
 
 const Main = () => {
     const navigate = useNavigate();
@@ -15,6 +16,11 @@ const Main = () => {
         setUser(JSON.parse(userStr));
     }, [navigate]);
 
+    // Bölümlere göre doktorları grupla
+    const getDoctorsByDepartment = (departmentId) => {
+        return doctors.filter(doctor => doctor.departmentId === departmentId);
+    };
+
     if (!user) return null;
 
     return (
@@ -23,35 +29,29 @@ const Main = () => {
             <div className="container mt-5">
                 <div className="row justify-content-center">
                     <div className="col-md-8 text-center text-white">
-                        <h1 className="mb-4">Hoş Geldiniz, {user.firstName} {user.lastName}!</h1>
-                        <p className="lead">Randevu sistemine başarıyla giriş yaptınız.</p>
-                        <div className="row mt-5">
-                            <div className="col-md-4">
-                                <div className="card bg-dark text-white border-light mb-3">
-                                    <div className="card-body">
-                                        <h5 className="card-title">Randevularım</h5>
-                                        <p className="card-text">Mevcut randevularınızı görüntüleyin</p>
-                                        <a href="/appointments" className="btn btn-outline-light">Görüntüle</a>
+                        <h1 className="mb-4">Hoş Geldin, {user.first_name} {user.last_name}</h1>
+                        <p className="lead mb-5">Hastane Randevu sistemine başarıyla giriş yaptınız.</p>
+                        {/* Bölümler ve Doktorlar */}
+                        <div className="mt-5">
+                            <h2 className="mb-4">Bölümlerimiz ve Doktorlarımız</h2>
+                            <div className="row">
+                                {departments.map(department => (
+                                    <div key={department.id} className="col-md-6 mb-4">
+                                        <div className="card bg-dark text-white border-light h-100">
+                                            <div className="card-body">
+                                                <h3 className="card-title h4 mb-4">{department.name}</h3>
+                                                <div className="list-group list-group-flush">
+                                                    {getDoctorsByDepartment(department.id).map(doctor => (
+                                                        <div key={doctor.id} className="list-group-item bg-dark text-white border-light">
+                                                            <i className="fas fa-user-md me-2"></i>
+                                                            {doctor.name}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div className="col-md-4">
-                                <div className="card bg-dark text-white border-light mb-3">
-                                    <div className="card-body">
-                                        <h5 className="card-title">Yeni Randevu</h5>
-                                        <p className="card-text">Yeni bir randevu oluşturun</p>
-                                        <a href="/new-appointment" className="btn btn-outline-light">Oluştur</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col-md-4">
-                                <div className="card bg-dark text-white border-light mb-3">
-                                    <div className="card-body">
-                                        <h5 className="card-title">Profil</h5>
-                                        <p className="card-text">Profil bilgilerinizi görüntüleyin</p>
-                                        <a href="/profile" className="btn btn-outline-light">Görüntüle</a>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
                         </div>
                     </div>

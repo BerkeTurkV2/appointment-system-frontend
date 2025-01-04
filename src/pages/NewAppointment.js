@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { departments, doctors } from '../data/hospitalData';
 
 const NewAppointment = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         department: '',
         doctor: '',
         date: '',
         time: ''
     });
-
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [availableDoctors, setAvailableDoctors] = useState([]);
 
     useEffect(() => {
@@ -30,7 +33,6 @@ const NewAppointment = () => {
             [name]: value
         }));
 
-        // Bölüm değiştiğinde doktor seçimini sıfırla
         if (name === 'department') {
             setFormData(prev => ({
                 ...prev,
@@ -41,11 +43,49 @@ const NewAppointment = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Backend bağlantısı yapıldığında burası güncellenecek
-        console.log(formData);
+        setError('');
+        setSuccess('');
+
+        try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
+                navigate('/');
+                return;
+            }
+
+            const selectedDoctor = doctors.find(d => d.id === parseInt(formData.doctor));
+            const selectedDepartment = departments.find(d => d.id === parseInt(formData.department));
+            
+            const appointmentData = {
+                user_id: user.id,
+                department: selectedDepartment.name,
+                doctor_name: selectedDoctor.name,
+                appointment_date: formData.date,
+                appointment_time: formData.time
+            };
+
+            const response = await fetch('http://localhost:8080/api/appointments/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(appointmentData)
+            });
+
+            if (response.ok) {
+                setSuccess('Randevunuz başarıyla oluşturuldu!');
+                setTimeout(() => {
+                    navigate('/appointments');
+                }, 2000);
+            } else {
+                const data = await response.json();
+                throw new Error(data.message || 'Randevu oluşturulurken bir hata oluştu');
+            }
+        } catch (err) {
+            setError(err.message || 'Randevu oluşturulurken bir hata oluştu');
+        }
     };
 
-    // Minimum tarih olarak bugünü ayarla
     const today = new Date().toISOString().split('T')[0];
 
     return (
@@ -57,6 +97,8 @@ const NewAppointment = () => {
                         <div className="card bg-dark text-white border-light">
                             <div className="card-body">
                                 <h2 className="text-center mb-4">Yeni Randevu</h2>
+                                {error && <div className="alert alert-danger">{error}</div>}
+                                {success && <div className="alert alert-success">{success}</div>}
                                 <form onSubmit={handleSubmit}>
                                     <div className="mb-3">
                                         <label className="form-label">Bölüm</label>

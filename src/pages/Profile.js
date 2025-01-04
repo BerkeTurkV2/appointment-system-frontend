@@ -27,7 +27,7 @@ const Profile = () => {
                                     <input
                                         type="text"
                                         className="form-control"
-                                        value={user.firstName}
+                                        value={user.first_name}
                                         disabled
                                     />
                                 </div>
@@ -36,7 +36,7 @@ const Profile = () => {
                                     <input
                                         type="text"
                                         className="form-control"
-                                        value={user.lastName}
+                                        value={user.last_name}
                                         disabled
                                     />
                                 </div>
